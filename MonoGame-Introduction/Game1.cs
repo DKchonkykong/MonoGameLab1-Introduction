@@ -8,6 +8,8 @@ namespace MonoGame_Introduction
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private Rectangle _rectangle;
+        private Texture2D _whitePixelTexture;
 
         public Game1()
         {
@@ -27,7 +29,13 @@ namespace MonoGame_Introduction
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            int rectangleWidth = 200;
+            int rectangleHeight = 100;
+            int x = (GraphicsDevice.Viewport.Width - rectangleWidth) / 2;
+            int y = (GraphicsDevice.Viewport.Height - rectangleHeight) / 2;
+            _rectangle = new Rectangle(x, y, rectangleWidth, rectangleHeight);
+            _whitePixelTexture = new Texture2D(GraphicsDevice, 1, 1);
+            _whitePixelTexture.SetData(new Color[] { Color.Red });
         }
 
         protected override void Update(GameTime gameTime)
@@ -44,7 +52,11 @@ namespace MonoGame_Introduction
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+
+            _spriteBatch.Draw(_whitePixelTexture, _rectangle, Color.White);
+
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
