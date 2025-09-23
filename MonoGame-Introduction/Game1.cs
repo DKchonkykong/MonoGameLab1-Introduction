@@ -11,6 +11,8 @@ namespace MonoGame_Introduction
         private Rectangle _rectangle;
         private Texture2D _whitePixelTexture;
         private Texture2D _monogameLogoTexture;
+        private SpriteFont _timerFont;
+        private float _timeRemaining = 10f;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -28,6 +30,10 @@ namespace MonoGame_Introduction
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _timerFont = Content.Load<SpriteFont>("Timer");
+            Vector2 timerSize = _timerFont.MeasureString(_timeRemaining.ToString());
+
+            Vector2 timerPosition = new Vector2(_graphics.GraphicsDevice.Viewport.Width - timerSize.X - 10, 10);
             _monogameLogoTexture = Content.Load<Texture2D>("SquareLogo_128px");
             int rectangleWidth = _monogameLogoTexture.Width;
             int rectangleHeight = _monogameLogoTexture.Height;
@@ -43,8 +49,13 @@ namespace MonoGame_Introduction
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            float secondsPassed = gameTime.ElapsedGameTime.Milliseconds / 1000f;
+            _timeRemaining -= secondsPassed;
 
+            if (_timeRemaining < 0)
+            {
+                _timeRemaining = 0;
+            }
             base.Update(gameTime);
         }
 
@@ -55,6 +66,14 @@ namespace MonoGame_Introduction
             _spriteBatch.Begin();
 
             _spriteBatch.Draw(_monogameLogoTexture, _rectangle, Color.White);
+
+            Vector2 timerSize = _timerFont.MeasureString(_timeRemaining.ToString());
+
+
+            Vector2 timerPosition = new Vector2(_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X - 10, 10);
+
+            _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPosition + new Vector2(2, 2), new Color(242f / 255, 70f / 255, 80f / 255, 1f));
+            _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPosition, new Color(252f / 255, 234f / 255, 51f / 255, 1f));
 
             _spriteBatch.End();
 
