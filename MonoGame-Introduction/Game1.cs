@@ -12,11 +12,14 @@ namespace MonoGame_Introduction
         private Texture2D _whitePixelTexture;
         private Texture2D _studioLogo;
         private SpriteFont _timerFont;
-        private float _timeRemaining = 10f;
+        private float _timeRemaining = 0f;
+        private int _score = 0;
         private string _mainMenu = "Title Screen \n Press space to play \n Press C for credits";
+        private string _gameOver = "Game Over \n Your score:";
         enum Screen { FlashScreen, TitleScreen, CreditsScreen, GameScreen, PauseScreen, GameOverScreen };
         private Screen _screen;
         private SpriteFont _mainMenuFont;
+        private SpriteFont _gameOverFont;
 
         public Game1()
         {
@@ -38,7 +41,8 @@ namespace MonoGame_Introduction
             _timerFont = Content.Load<SpriteFont>("Timer");
             Vector2 timerSize = _timerFont.MeasureString(_timeRemaining.ToString());
 
-            Vector2 timerPosition = new Vector2(_graphics.GraphicsDevice.Viewport.Width - timerSize.X - 10, 10);
+            Vector2 timerPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2,(_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
+            
             _studioLogo = Content.Load<Texture2D>("SquareLogo_128px");
             int rectangleWidth = _studioLogo.Width;
             int rectangleHeight = _studioLogo.Height;
@@ -48,6 +52,7 @@ namespace MonoGame_Introduction
             _whitePixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _whitePixelTexture.SetData(new Color[] { Color.Red });
             _mainMenuFont = Content.Load<SpriteFont>("MainMenuFont");
+            _gameOverFont = Content.Load<SpriteFont>("GameOverFont");
 
 
 
@@ -61,9 +66,20 @@ namespace MonoGame_Introduction
 
             switch (_screen)
             {
+                case Screen.TitleScreen:
+                    if (Keyboard.GetState().IsKeyDown(Keys.C))
+                    {
+                        _screen = Screen.GameOverScreen;
+                    }
+                    else if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                    {
+                        _screen = Screen.GameScreen;
+                    }
+                    break;
+                //flash screen is the main game screen for now and interacts with titlescreen
                 case Screen.FlashScreen:
-                    _timeRemaining -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    
+                    _timeRemaining += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
 
                     MouseState mouse = Mouse.GetState();
                     if (_rectangle.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
@@ -71,19 +87,9 @@ namespace MonoGame_Introduction
                         _screen = Screen.TitleScreen;
                         break;
                     }
-                    if (_timeRemaining < 0)
+                    if (_timeRemaining > 15)
                     {
-                        _screen = Screen.TitleScreen;
-                    }
-                    break;
-                case Screen.TitleScreen:
-                    if (Keyboard.GetState().IsKeyDown(Keys.C))
-                    {
-                        _screen = Screen.CreditsScreen;
-                    }
-                    else if (Keyboard.GetState().IsKeyDown(Keys.Space))
-                    {
-                        _screen = Screen.GameScreen;
+                        _screen = Screen.GameOverScreen;
                     }
                     break;
                 case Screen.CreditsScreen:
@@ -99,10 +105,10 @@ namespace MonoGame_Introduction
                 case Screen.GameScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.P))
                     {
-                        _screen = Screen.PauseScreen;
+                        _screen = Screen.FlashScreen;
                     }
-                    else if (_rectangle.Contains(Mouse.GetState().Position)
-        && Mouse.GetState().LeftButton == ButtonState.Pressed)
+                    //this doesn't do anything
+                    else if (_rectangle.Contains(Mouse.GetState().Position) && Mouse.GetState().LeftButton == ButtonState.Pressed)
                     {
                         _screen = Screen.GameOverScreen;
                         _timeRemaining = 2f;
@@ -146,7 +152,8 @@ namespace MonoGame_Introduction
 
                     _spriteBatch.Draw(_studioLogo, _rectangle, Color.White);
 
-                    Vector2 timerPosition = new Vector2(_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X - 10, 10);
+                    Vector2 timerPosition = new Vector2(
+                        (_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2,(_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
 
                     _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPosition + new Vector2(2, 2), new Color(242f / 255, 70f / 255, 80f / 255, 1f));
                     _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPosition, new Color(252f / 255, 234f / 255, 51f / 255, 1f));
@@ -163,6 +170,8 @@ namespace MonoGame_Introduction
                 case Screen.PauseScreen:
                     break;
                 case Screen.GameOverScreen:
+                    Vector2 GameOverPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _gameOverFont.MeasureString(_mainMenu).X) / 2, _graphics.GraphicsDevice.Viewport.Height / 3);
+                    _spriteBatch.DrawString(_gameOverFont, _gameOver + _score, GameOverPosition, Color.White);
                     break;
             }
             _spriteBatch.End();
