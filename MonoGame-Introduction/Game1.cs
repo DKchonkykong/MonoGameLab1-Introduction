@@ -13,7 +13,7 @@ namespace MonoGame_Introduction
         private Texture2D _studioLogo;
         private SpriteFont _timerFont;
         private float _timeRemaining = 10f;
-        private string _mainMenu = "Title Screen, Press space to play, Press C for credits";
+        private string _mainMenu = "Title Screen \n Press space to play \n Press C for credits";
         enum Screen { FlashScreen, TitleScreen, CreditsScreen, GameScreen, PauseScreen, GameOverScreen };
         private Screen _screen;
         private SpriteFont _mainMenuFont;
@@ -152,7 +152,7 @@ namespace MonoGame_Introduction
                     _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPosition, new Color(252f / 255, 234f / 255, 51f / 255, 1f));
                     break;
                 case Screen.TitleScreen:
-                    Vector2 mainMenuPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _mainMenuFont.MeasureString(_mainMenu).X) / 2, _graphics.GraphicsDevice.Viewport.Height / 2);
+                    Vector2 mainMenuPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _mainMenuFont.MeasureString(_mainMenu).X) / 2, _graphics.GraphicsDevice.Viewport.Height / 3);
                     _spriteBatch.DrawString(_mainMenuFont, _mainMenu, mainMenuPosition, Color.White);
 
                     break;
