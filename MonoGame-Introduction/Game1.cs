@@ -41,8 +41,8 @@ namespace MonoGame_Introduction
             _timerFont = Content.Load<SpriteFont>("Timer");
             Vector2 timerSize = _timerFont.MeasureString(_timeRemaining.ToString());
 
-            Vector2 timerPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2,(_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
-            
+            Vector2 timerPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2, (_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
+
             _studioLogo = Content.Load<Texture2D>("SquareLogo_128px");
             int rectangleWidth = _studioLogo.Width;
             int rectangleHeight = _studioLogo.Height;
@@ -53,10 +53,6 @@ namespace MonoGame_Introduction
             _whitePixelTexture.SetData(new Color[] { Color.Red });
             _mainMenuFont = Content.Load<SpriteFont>("MainMenuFont");
             _gameOverFont = Content.Load<SpriteFont>("GameOverFont");
-
-
-
-
         }
 
         protected override void Update(GameTime gameTime)
@@ -69,17 +65,20 @@ namespace MonoGame_Introduction
                 case Screen.TitleScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.C))
                     {
-                        _screen = Screen.GameOverScreen;
+                        GoToGameOver();
                     }
                     else if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     {
+                        // start new run
+                        _timeRemaining = 0f;
+                        _score = 0;
                         _screen = Screen.GameScreen;
                     }
                     break;
-                //flash screen is the main game screen for now and interacts with titlescreen
+
+                // splash/flash screen with timer
                 case Screen.FlashScreen:
                     _timeRemaining += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
 
                     MouseState mouse = Mouse.GetState();
                     if (_rectangle.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
@@ -87,11 +86,12 @@ namespace MonoGame_Introduction
                         _screen = Screen.TitleScreen;
                         break;
                     }
-                    if (_timeRemaining > 15)
+                    if (_timeRemaining > 15f)
                     {
-                        _screen = Screen.GameOverScreen;
+                        GoToGameOver();
                     }
                     break;
+
                 case Screen.CreditsScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.T))
                     {
@@ -102,18 +102,19 @@ namespace MonoGame_Introduction
                         _screen = Screen.GameScreen;
                     }
                     break;
+
                 case Screen.GameScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.P))
                     {
                         _screen = Screen.FlashScreen;
                     }
-                    //this doesn't do anything
                     else if (_rectangle.Contains(Mouse.GetState().Position) && Mouse.GetState().LeftButton == ButtonState.Pressed)
                     {
-                        _screen = Screen.GameOverScreen;
-                        _timeRemaining = 2f;
+                        // compute score from elapsed time and go to Game Over
+                        GoToGameOver();
                     }
                     break;
+
                 case Screen.PauseScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.C))
                     {
@@ -124,6 +125,7 @@ namespace MonoGame_Introduction
                         _screen = Screen.GameScreen;
                     }
                     break;
+
                 case Screen.GameOverScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.C))
                     {
@@ -131,12 +133,30 @@ namespace MonoGame_Introduction
                     }
                     else if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     {
+                        // start another run
+                        _timeRemaining = 0f;
+                        _score = 0;
                         _screen = Screen.GameScreen;
                     }
                     break;
             }
 
             base.Update(gameTime);
+        }
+
+        private void GoToGameOver()
+        {
+            const float timeLimit = 10f;
+            const int pointsPerSecond = 100; // 10s * 100 = 1000 max
+
+            float raw = (timeLimit - _timeRemaining) * pointsPerSecond;
+
+            // Clamp to [0, 1000]; times > 10s yield 0
+            _score = (int)System.MathF.Round(
+                System.Math.Clamp(raw, 0f, timeLimit * pointsPerSecond)
+            );
+
+            _screen = Screen.GameOverScreen;
         }
 
         protected override void Draw(GameTime gameTime)
@@ -153,25 +173,36 @@ namespace MonoGame_Introduction
                     _spriteBatch.Draw(_studioLogo, _rectangle, Color.White);
 
                     Vector2 timerPosition = new Vector2(
-                        (_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2,(_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
+                        (_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2, (_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
 
                     _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPosition + new Vector2(2, 2), new Color(242f / 255, 70f / 255, 80f / 255, 1f));
                     _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPosition, new Color(252f / 255, 234f / 255, 51f / 255, 1f));
                     break;
+
                 case Screen.TitleScreen:
                     Vector2 mainMenuPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _mainMenuFont.MeasureString(_mainMenu).X) / 2, _graphics.GraphicsDevice.Viewport.Height / 3);
                     _spriteBatch.DrawString(_mainMenuFont, _mainMenu, mainMenuPosition, Color.White);
-
                     break;
+
                 case Screen.CreditsScreen:
                     break;
+
                 case Screen.GameScreen:
                     break;
+
                 case Screen.PauseScreen:
                     break;
+
                 case Screen.GameOverScreen:
-                    Vector2 GameOverPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _gameOverFont.MeasureString(_mainMenu).X) / 2, _graphics.GraphicsDevice.Viewport.Height / 3);
-                    _spriteBatch.DrawString(_gameOverFont, _gameOver + _score, GameOverPosition, Color.White);
+                    string gameOverText = $"{_gameOver} {_score}";
+                    Vector2 textSize = _gameOverFont.MeasureString(gameOverText);
+                    Vector2 gameOverPosition = new Vector2(
+                        (_graphics.GraphicsDevice.Viewport.Width - textSize.X) / 2f,
+                        (_graphics.GraphicsDevice.Viewport.Height - textSize.Y) / 2f
+                    );
+                    // optional subtle shadow
+                    _spriteBatch.DrawString(_gameOverFont, gameOverText, gameOverPosition + new Vector2(2, 2), new Color(242f / 255, 70f / 255, 80f / 255, 1f));
+                    _spriteBatch.DrawString(_gameOverFont, gameOverText, gameOverPosition, new Color(252f / 255, 234f / 255, 51f / 255, 1f));
                     break;
             }
             _spriteBatch.End();
