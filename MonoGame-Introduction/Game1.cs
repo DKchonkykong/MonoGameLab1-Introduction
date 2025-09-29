@@ -34,7 +34,7 @@ namespace MonoGame_Introduction
 
             base.Initialize();
         }
-
+        
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -62,10 +62,10 @@ namespace MonoGame_Introduction
 
             switch (_screen)
             {
-                case Screen.TitleScreen:
+                case Screen.CreditsScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.C))
                     {
-                        GoToGameOver();
+                        _screen = Screen.TitleScreen;
                     }
                     else if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     {
@@ -76,14 +76,15 @@ namespace MonoGame_Introduction
                     }
                     break;
 
-                // splash/flash screen with timer
+                
                 case Screen.FlashScreen:
                     _timeRemaining += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                     MouseState mouse = Mouse.GetState();
                     if (_rectangle.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
                     {
-                        _screen = Screen.TitleScreen;
+                        //_screen = Screen.CreditsScreen;
+                        GoToGameOver();
                         break;
                     }
                     if (_timeRemaining > 15f)
@@ -92,10 +93,10 @@ namespace MonoGame_Introduction
                     }
                     break;
 
-                case Screen.CreditsScreen:
+                case Screen.TitleScreen:
                     if (Keyboard.GetState().IsKeyDown(Keys.T))
                     {
-                        _screen = Screen.TitleScreen;
+                        _screen = Screen.CreditsScreen;
                     }
                     else if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     {
@@ -110,7 +111,7 @@ namespace MonoGame_Introduction
                     }
                     else if (_rectangle.Contains(Mouse.GetState().Position) && Mouse.GetState().LeftButton == ButtonState.Pressed)
                     {
-                        // compute score from elapsed time and go to Game Over
+                        // calculates score from time and goes to game over method
                         GoToGameOver();
                     }
                     break;
@@ -146,15 +147,20 @@ namespace MonoGame_Introduction
 
         private void GoToGameOver()
         {
-            const float timeLimit = 10f;
-            const int pointsPerSecond = 100; // 10s * 100 = 1000 max
+            const float timeLimit = 10f;   // full score at 10s
+            const int maxScore = 1000;
 
-            float raw = (timeLimit - _timeRemaining) * pointsPerSecond;
-
-            // Clamp to [0, 1000]; times > 10s yield 0
-            _score = (int)System.MathF.Round(
-                System.Math.Clamp(raw, 0f, timeLimit * pointsPerSecond)
-            );
+            if (_timeRemaining <= timeLimit)
+            {
+                // Linear scale: 0s -> 0, 10s -> 1000
+                float ratio = _timeRemaining / timeLimit;
+                _score = (int)System.MathF.Round(ratio * maxScore);
+            }
+            else
+            {
+                // Exceeded 10s -> score is 0
+                _score = 0;
+            }
 
             _screen = Screen.GameOverScreen;
         }
@@ -200,7 +206,7 @@ namespace MonoGame_Introduction
                         (_graphics.GraphicsDevice.Viewport.Width - textSize.X) / 2f,
                         (_graphics.GraphicsDevice.Viewport.Height - textSize.Y) / 2f
                     );
-                    // optional subtle shadow
+                    // text shadow
                     _spriteBatch.DrawString(_gameOverFont, gameOverText, gameOverPosition + new Vector2(2, 2), new Color(242f / 255, 70f / 255, 80f / 255, 1f));
                     _spriteBatch.DrawString(_gameOverFont, gameOverText, gameOverPosition, new Color(252f / 255, 234f / 255, 51f / 255, 1f));
                     break;
