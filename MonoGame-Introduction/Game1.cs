@@ -1,6 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.IO;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace MonoGame_Introduction
 {
@@ -20,6 +23,7 @@ namespace MonoGame_Introduction
         private Screen _screen;
         private SpriteFont _mainMenuFont;
         private SpriteFont _gameOverFont;
+        private List<string> _highScores = new List<string>();
 
         public Game1()
         {
@@ -53,6 +57,21 @@ namespace MonoGame_Introduction
             _whitePixelTexture.SetData(new Color[] { Color.Red });
             _mainMenuFont = Content.Load<SpriteFont>("MainMenuFont");
             _gameOverFont = Content.Load<SpriteFont>("GameOverFont");
+            
+            LoadHighScores();
+        }
+        //method that loads high scores not working at the moment i think it might be that monogame doesn't recogize txt files
+        private void LoadHighScores()
+        {
+            string path = Path.Combine(Content.RootDirectory, "HighScore.txt");
+            if (File.Exists(path))
+            {
+                _highScores = File.ReadAllLines(path).ToList();
+            }
+            else
+            {
+                _highScores = new List<string> { "No high scores found." };
+            }
         }
 
         protected override void Update(GameTime gameTime)
@@ -105,7 +124,6 @@ namespace MonoGame_Introduction
                     break;
 
                 case Screen.GameScreen:
-                    
                     _timeRemaining += (float)gameTime.ElapsedGameTime.TotalSeconds; //have a feeling this just unpauses the timer and repauses again instead of resetting it 
                     MouseState mouseGame = Mouse.GetState();
                     if (_rectangle.Contains(mouseGame.Position) && mouseGame.LeftButton == ButtonState.Pressed)
@@ -162,10 +180,12 @@ namespace MonoGame_Introduction
                 // Linear scale 
                 float ratio = _timeRemaining / timeLimit;
                 _score = (int)System.MathF.Round(ratio * maxScore);
+                _timeRemaining = 0f;
+
             }
             else
             {
-                
+                _timeRemaining = 0;
                 _score = 0;
             }
 
@@ -212,7 +232,8 @@ namespace MonoGame_Introduction
                     break;
 
                 case Screen.GameOverScreen:
-                    string gameOverText = $"{_gameOver} {_score}";
+                    // updated game overscreen to also include high scores in it 
+                    string gameOverText = $"{_gameOver} {_score}\n\nHigh Scores:\n{string.Join("\n", _highScores)}";
                     Vector2 textSize = _gameOverFont.MeasureString(gameOverText);
                     Vector2 gameOverPosition = new Vector2(
                         (_graphics.GraphicsDevice.Viewport.Width - textSize.X) / 2f,
