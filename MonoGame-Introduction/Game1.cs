@@ -61,7 +61,7 @@ namespace MonoGame_Introduction
             
             LoadHighScores();
         }
-        //method that loads high scores not working at the moment i think it might be that monogame doesn't recogize txt files
+        //method that loads high scores and i also wanted it so it like displays highest score correctly 
         private void LoadHighScores()
         {
             string path = Path.Combine(Content.RootDirectory, "HighScore.txt");
@@ -224,8 +224,13 @@ namespace MonoGame_Introduction
                     break;
 
                 case Screen.TitleScreen:
-                    Vector2 mainMenuPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _mainMenuFont.MeasureString(_mainMenu).X) / 2, _graphics.GraphicsDevice.Viewport.Height / 3);
-                    _spriteBatch.DrawString(_mainMenuFont, _mainMenu, mainMenuPosition, Color.White);
+                    // title screen with high scores
+                    string allScoresText = _mainMenu + "\n\nHigh Scores:\n" + string.Join("\n", _highScores);
+                    Vector2 mainMenuPosition = new Vector2(
+                        (_graphics.GraphicsDevice.Viewport.Width - _mainMenuFont.MeasureString(allScoresText).X) / 2,
+                        _graphics.GraphicsDevice.Viewport.Height / 4
+                    );
+                    _spriteBatch.DrawString(_mainMenuFont, allScoresText, mainMenuPosition, Color.White);
                     break;
 
                 case Screen.CreditsScreen:
