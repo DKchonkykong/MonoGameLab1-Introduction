@@ -105,13 +105,14 @@ namespace MonoGame_Introduction
                     break;
 
                 case Screen.GameScreen:
-                    _timeRemaining += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    
+                    _timeRemaining += (float)gameTime.ElapsedGameTime.TotalSeconds; //have a feeling this just unpauses the timer and repauses again instead of resetting it 
                     MouseState mouseGame = Mouse.GetState();
                     if (_rectangle.Contains(mouseGame.Position) && mouseGame.LeftButton == ButtonState.Pressed)
                     {
                         //_screen = Screen.CreditsScreen;
                         //need to fix this so it resets for real 
-                        _timeRemaining = 0f;
+                        
                         _score = 0;
                         GoToGameOver();
                         break;
@@ -181,7 +182,7 @@ namespace MonoGame_Introduction
             switch (_screen)
             {
                 case Screen.FlashScreen:
-                    //have a feeling this is why rectangles and textrues load here and not in the gamescreen since it is empty 
+                    //have a feeling this is why rectangles and textrues load here and not in the gamescreen since it is empty nvm fixed it
                     _spriteBatch.Draw(_studioLogo, _rectangle, Color.White);
 
                     Vector2 timerPosition = new Vector2(
@@ -198,7 +199,7 @@ namespace MonoGame_Introduction
 
                 case Screen.CreditsScreen:
                     break;
-                //it now froze im guessing code for it to work isn't there
+                
                 case Screen.GameScreen:
                     _spriteBatch.Draw(_studioLogo, _rectangle, Color.White);
                      Vector2 timerPositionGame = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2, (_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
