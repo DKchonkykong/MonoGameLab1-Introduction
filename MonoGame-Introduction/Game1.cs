@@ -24,6 +24,7 @@ namespace MonoGame_Introduction
         private SpriteFont _mainMenuFont;
         private SpriteFont _gameOverFont;
         private List<string> _highScores = new List<string>();
+        private int _highestScore;
 
         public Game1()
         {
@@ -66,7 +67,17 @@ namespace MonoGame_Introduction
             string path = Path.Combine(Content.RootDirectory, "HighScore.txt");
             if (File.Exists(path))
             {
-                _highScores = File.ReadAllLines(path).ToList();
+                foreach (var line in File.ReadAllLines(path))
+                {
+                    _highScores.Add(line);
+                    // parses score like name:score
+                    var parts = line.Split(':');
+                    if (parts.Length == 2 && int.TryParse(parts[1], out int score))
+                    {
+                        if (score > _highestScore)
+                            _highestScore = score;
+                    }
+                }
             }
             else
             {
@@ -232,8 +243,10 @@ namespace MonoGame_Introduction
                     break;
 
                 case Screen.GameOverScreen:
-                    // updated game overscreen to also include high scores in it 
-                    string gameOverText = $"{_gameOver} {_score}\n\nHigh Scores:\n{string.Join("\n", _highScores)}";
+                    //updated high score to include player highest score
+                    bool isHighScore = _score >= _highestScore && _score > 0;
+                    string highScoreMsg = isHighScore ? "\n\nBravo! You Got a New High Score!" : "";
+                    string gameOverText = $"{_gameOver} {_score}\n\nHighest Score: {_highestScore}{highScoreMsg}";
                     Vector2 textSize = _gameOverFont.MeasureString(gameOverText);
                     Vector2 gameOverPosition = new Vector2(
                         (_graphics.GraphicsDevice.Viewport.Width - textSize.X) / 2f,
