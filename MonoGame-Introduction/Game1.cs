@@ -105,13 +105,19 @@ namespace MonoGame_Introduction
                     break;
 
                 case Screen.GameScreen:
-                    if (Keyboard.GetState().IsKeyDown(Keys.P))
+                    _timeRemaining += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    MouseState mouseGame = Mouse.GetState();
+                    if (_rectangle.Contains(mouseGame.Position) && mouseGame.LeftButton == ButtonState.Pressed)
                     {
-                        _screen = Screen.FlashScreen;
+                        //_screen = Screen.CreditsScreen;
+                        //need to fix this so it resets for real 
+                        _timeRemaining = 0f;
+                        _score = 0;
+                        GoToGameOver();
+                        break;
                     }
-                    else if (_rectangle.Contains(Mouse.GetState().Position) && Mouse.GetState().LeftButton == ButtonState.Pressed)
+                    if (_timeRemaining > 15f)
                     {
-                        // calculates score from time and goes to game over method
                         GoToGameOver();
                     }
                     break;
@@ -152,13 +158,13 @@ namespace MonoGame_Introduction
 
             if (_timeRemaining <= timeLimit)
             {
-                // Linear scale: 0s -> 0, 10s -> 1000
+                // Linear scale 
                 float ratio = _timeRemaining / timeLimit;
                 _score = (int)System.MathF.Round(ratio * maxScore);
             }
             else
             {
-                // Exceeded 10s -> score is 0
+                
                 _score = 0;
             }
 
@@ -175,7 +181,7 @@ namespace MonoGame_Introduction
             switch (_screen)
             {
                 case Screen.FlashScreen:
-
+                    //have a feeling this is why rectangles and textrues load here and not in the gamescreen since it is empty 
                     _spriteBatch.Draw(_studioLogo, _rectangle, Color.White);
 
                     Vector2 timerPosition = new Vector2(
@@ -192,8 +198,13 @@ namespace MonoGame_Introduction
 
                 case Screen.CreditsScreen:
                     break;
-
+                //it now froze im guessing code for it to work isn't there
                 case Screen.GameScreen:
+                    _spriteBatch.Draw(_studioLogo, _rectangle, Color.White);
+                     Vector2 timerPositionGame = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2, (_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
+
+                    _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPositionGame + new Vector2(2, 2), new Color(242f / 255, 70f / 255, 80f / 255, 1f));
+                    _spriteBatch.DrawString(_timerFont, _timeRemaining.ToString("0.0"), timerPositionGame, new Color(252f / 255, 234f / 255, 51f / 255, 1f));
                     break;
 
                 case Screen.PauseScreen:
