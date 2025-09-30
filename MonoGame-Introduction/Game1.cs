@@ -47,7 +47,7 @@ namespace MonoGame_Introduction
             Vector2 timerSize = _timerFont.MeasureString(_timeRemaining.ToString());
 
             Vector2 timerPosition = new Vector2((_graphics.GraphicsDevice.Viewport.Width - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).X) / 2, (_graphics.GraphicsDevice.Viewport.Height - _timerFont.MeasureString(_timeRemaining.ToString("0.0")).Y) / 2);
-
+            //supposed to add rectangle logic here didn't have enough time 
             _studioLogo = Content.Load<Texture2D>("SquareLogo_128px");
             int rectangleWidth = _studioLogo.Width;
             int rectangleHeight = _studioLogo.Height;
